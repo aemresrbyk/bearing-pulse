@@ -1,0 +1,28 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Raw data (download it, don't commit it)
+data/raw/
+*.mat
+
+# Firmware build output
+.pio/
+build/
+
+# Secrets (Wi-Fi, MQTT passwords)
+secrets.h
+.env
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# KiCad backups
+*-backups/
+*.kicad_prl
+fp-info-cache
