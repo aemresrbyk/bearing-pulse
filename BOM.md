@@ -15,10 +15,14 @@ Nothing to buy. Any laptop with Python 3.10+ is enough (no GPU needed).
 | Small 12 V fan or DC motor | 1 | 2–4 | 212.00 TL | XMER 80×80×25 mm, 12 V 0.30 A, 2 wires. The "machine" under test |
 | 12 V adapter (for fan/motor) | 1 | 2–4 | 152.10 TL | Weiron 12 V 2 A, 5.5×2.5 mm plug. Plug cut off and soldered to the fan wires (barrel-jack terminals are 2.1 mm and would sit loose) |
 | Soldering iron set | 1 | 2, 6 | 908.99 TL | Wellhise S90, temperature-controlled. Needed for the ADXL345 headers and the Phase 6 board |
-| Breadboard | 1 | 2 | | |
-| Jumper wires (M-M, M-F) | 1 set | 2 | | |
-| Micro-USB / USB-C data cable | 1 | 2 | | Must support data, not only charging |
-| Tape / small weight | — | 3–4 | | Stuck on a fan blade to create imbalance |
+| Breadboard | 1 | 2 | 103.93 TL | MB-102, 830 points |
+| Jumper wires (M-M, F-F, M-F) | 3×40 | 2 | 249.00 TL | |
+| USB-C to micro-USB data cable | 1 | 2 | 285.95 TL | Coverzone 1 m. Mac has USB-C only, ESP32 board is micro-USB |
+| Small cable ties (2.5 mm) | 100 | 2 | 152.91 TL | Sensor tied through its holes to the fan frame. Rigid on purpose: foam tape would damp the vibration we measure |
+| Electrical tape | 1 | 3–4 | 89.90 TL | 3M Temflex. Small weight taped to a fan blade = imbalance fault |
+| Heat-shrink tubing set | 1 | 2 | 218.18 TL | Insulates the adapter-to-fan solder joints |
+| Wire stripper / cutter | 1 | 2 | 399.99 TL | AEE 160 mm. Cuts the adapter plug, strips the wires |
+| Multimeter | 1 | 2 | — | Already had. Checks adapter polarity before soldering |
 | *Optional:* MPU6050 | 1 | 2 | | Backup sensor, noisier than ADXL345 |
 | *Optional:* 18650 cell + TP4056 charger | 1 | 5 | | Battery / deep-sleep tests |
 
