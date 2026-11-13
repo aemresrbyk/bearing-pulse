@@ -33,7 +33,7 @@ Phases:
 | 3 | Features computed on the device | C code done and tested, own dataset needs hardware |
 | 4 | Model on the device + alert | C model and Grafana alert done, running it on the device needs hardware |
 | 5 | Field-ready: security, connection loss, OTA, sleep | TLS + password done, the rest needs hardware |
-| 6 | Custom PCB | Not started |
+| 6 | Custom board: PCB designed in KiCad, built on perfboard (not ordered) | Not started |
 
 ---
 

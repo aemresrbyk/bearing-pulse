@@ -1,6 +1,6 @@
 # Bearing Pulse
 
-**End-to-end vibration fault detection — from a public dataset to my own sensor node, edge ML and custom PCB.**
+**End-to-end vibration fault detection — from a public dataset to my own sensor node, edge ML and a custom board.**
 
 A small, at-home version of an industrial predictive maintenance system (the kind used to monitor wind turbines and other rotating machines). Every phase is documented as a step-by-step build log, including what went wrong.
 
@@ -25,7 +25,7 @@ Rotating machines fail slowly: bearings wear, rotors go out of balance. Vibratio
 | 3 | [Edge features](docs/03-edge-features.md) | RMS / kurtosis / FFT bands computed on the ESP32, own labeled dataset | 🟨 Features in C, tested against NumPy; own dataset needs hardware |
 | 4 | [TinyML on ESP32](docs/04-tinyml-on-esp32.md) | Model running on the device, alarm in Grafana, robustness test | 🟨 Model in C + Grafana alert done; on-device run needs hardware |
 | 5 | [Field-ready](docs/05-field-ready.md) | Offline buffering, OTA updates, deep sleep, TLS | 🟨 TLS + password done; buffering, OTA, sleep need hardware |
-| 6 | [Custom PCB](docs/06-custom-pcb.md) | KiCad board for ESP32 + sensor, ordered and assembled | ⬜ Planned |
+| 6 | [Custom board](docs/06-custom-pcb.md) | PCB designed in KiCad (order-ready), built by hand on perfboard | ⬜ Planned |
 
 Status: ⬜ Planned · 🟨 In progress · ✅ Done
 

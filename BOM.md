@@ -26,13 +26,15 @@ Nothing to buy. Any laptop with Python 3.10+ is enough (no GPU needed).
 | *Optional:* MPU6050 | 1 | 2 | | Backup sensor, noisier than ADXL345 |
 | *Optional:* 18650 cell + TP4056 charger | 1 | 5 | | Battery / deep-sleep tests |
 
-## Phase 6 — custom PCB
+## Phase 6 — custom board (designed in KiCad, built on perfboard)
 
 | Part | Qty | Approx. price | Notes |
 |------|-----|---------------|-------|
-| PCB order (e.g. JLCPCB, 5 boards) | 1 | | Plus shipping |
-| Components for the board | — | | Generated from KiCad BOM |
-| Soldering iron, solder, flux | 1 set | | Already bought for Phase 2 (see above) |
+| Perfboard (prototype board) | 1 | | Sized to the KiCad layout |
+| Female pin headers | 2×15 + 1×8 | | ESP32 plugs in (removable); connector for the sensor cable |
+| Hook-up wire | — | | Point-to-point wiring on the back |
+| Soldering iron, solder | 1 set | — | Already bought for Phase 2 (see above) |
+| *Not planned:* fabricated PCB (e.g. JLCPCB) | — | | Design is order-ready (Gerbers in `hardware/pcb/`), but not ordered |
 
 ## What I already had
 
