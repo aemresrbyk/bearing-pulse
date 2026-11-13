@@ -29,6 +29,8 @@ Rotating machines fail slowly: bearings wear, rotors go out of balance. Vibratio
 
 Status: ⬜ Planned · 🟨 In progress · ✅ Done
 
+Türkçe, baştan sona açıklama (ne, neden, hangi dosyada): [docs/NASIL-CALISIR.md](docs/NASIL-CALISIR.md)
+
 ## Repository layout
 
 ```
