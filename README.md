@@ -29,7 +29,7 @@ Rotating machines fail slowly: bearings wear, rotors go out of balance. Vibratio
 
 Status: ⬜ Planned · 🟨 In progress · ✅ Done
 
-Türkçe, baştan sona açıklama (ne, neden, hangi dosyada): [docs/NASIL-CALISIR.md](docs/NASIL-CALISIR.md)
+Full walkthrough of every phase (what, why, which file): [docs/HOW-IT-WORKS.md](docs/HOW-IT-WORKS.md)
 
 ## Repository layout
 
@@ -110,7 +110,7 @@ Two data traps worth knowing: the CWRU **normal recordings are 48 kHz** while th
 
 ## Author
 
-**Ali Emre Sarıbıyık** — Electrical & Electronics Engineer (Yaşar University). Signal processing, applied ML, embedded systems.
+**Ali Emre Sarıbıyık** — Electrical & Electronics Engineer. Signal processing, applied ML, embedded systems.
 
 ## License
 
