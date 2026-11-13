@@ -22,7 +22,7 @@ Nothing to buy. Any laptop with Python 3.10+ is enough (no GPU needed).
 | Small cable ties (2.5×100 mm) | 100 | 2 | 98.20 TL | Sensor tied through its holes to the fan frame. Rigid on purpose: foam tape would damp the vibration we measure |
 | Electrical tape | 1 | 3–4 | 89.90 TL | 3M Temflex. Small weight taped to a fan blade = imbalance fault |
 | Wire stripper / cutter | 1 | 2 | — | Already had. Cuts the adapter plug, strips the wires |
-| Multimeter | 1 | 2 | — | Already had. Checks adapter polarity before soldering |
+| Multimeter | 1 | 2 | — | Already had. Checks adapter polarity before wiring |
 | *Optional:* MPU6050 | 1 | 2 | | Backup sensor, noisier than ADXL345 |
 | *Optional:* 18650 cell + TP4056 charger | 1 | 5 | | Battery / deep-sleep tests |
 
