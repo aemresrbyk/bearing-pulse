@@ -1,0 +1,38 @@
+# Fires when most of a node's on-device predictions in the last minute say "fault".
+# Averaging over a minute means one misclassified window doesn't page anyone.
+apiVersion: 1
+groups:
+  - orgId: 1
+    name: bearing
+    folder: Bearing Pulse
+    interval: 10s
+    rules:
+      - uid: bearing-fault
+        title: Bearing fault
+        condition: C
+        for: 30s
+        noDataState: OK          # node offline is a different problem; don't call it a fault
+        execErrState: Error
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.node }}: {{ humanizePercentage $values.B.Value }} of the last minute's windows classified as a fault"
+        data:
+          - refId: A
+            datasourceUid: influx
+            relativeTimeRange: { from: 60, to: 0 }
+            model:
+              refId: A
+              rawQuery: true
+              resultFormat: time_series
+              query: SELECT mean("fault") FROM "model" WHERE $timeFilter GROUP BY "node"
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: reduce, expression: A, reducer: last }
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: B
+              conditions: [{ evaluator: { type: gt, params: [0.5] } }]

@@ -21,10 +21,10 @@ Rotating machines fail slowly: bearings wear, rotors go out of balance. Vibratio
 | # | Phase | What it covers | Status |
 |---|-------|----------------|--------|
 | 1 | [ML on CWRU bearing data](docs/01-ml-on-cwru-data.md) | FFT, envelope spectrum, features, Random Forest, failure under load change | ✅ Done |
-| 2 | [Sensor node + MQTT](docs/02-sensor-node-mqtt.md) | ESP32 + ADXL345, MQTT, InfluxDB, Grafana live dashboard | ⬜ Planned |
-| 3 | [Edge features](docs/03-edge-features.md) | RMS / kurtosis / FFT bands computed on the ESP32, own labeled dataset | ⬜ Planned |
-| 4 | [TinyML on ESP32](docs/04-tinyml-on-esp32.md) | Model running on the device, alarm in Grafana, robustness test | ⬜ Planned |
-| 5 | [Field-ready](docs/05-field-ready.md) | Offline buffering, OTA updates, deep sleep, TLS | ⬜ Planned |
+| 2 | [Sensor node + MQTT](docs/02-sensor-node-mqtt.md) | ESP32 + ADXL345, MQTT, InfluxDB, Grafana live dashboard | 🟨 Software done with a simulated node; hardware pending |
+| 3 | [Edge features](docs/03-edge-features.md) | RMS / kurtosis / FFT bands computed on the ESP32, own labeled dataset | 🟨 Features in C, tested against NumPy; own dataset needs hardware |
+| 4 | [TinyML on ESP32](docs/04-tinyml-on-esp32.md) | Model running on the device, alarm in Grafana, robustness test | 🟨 Model in C + Grafana alert done; on-device run needs hardware |
+| 5 | [Field-ready](docs/05-field-ready.md) | Offline buffering, OTA updates, deep sleep, TLS | 🟨 TLS + password done; buffering, OTA, sleep need hardware |
 | 6 | [Custom PCB](docs/06-custom-pcb.md) | KiCad board for ESP32 + sensor, ordered and assembled | ⬜ Planned |
 
 Status: ⬜ Planned · 🟨 In progress · ✅ Done
@@ -62,6 +62,20 @@ jupyter notebook notebooks/
 ```
 
 Dataset download steps: [data/README.md](data/README.md)
+
+## Quick start (Phases 2–5, no hardware needed)
+
+A simulator plays CWRU recordings over MQTT in the same message format the ESP32 will use.
+
+```bash
+brew install mosquitto influxdb grafana
+scripts/make_certs.sh                                   # TLS certs + MQTT password (.local/, .env)
+scripts/stack.sh start                                  # Mosquitto, InfluxDB 3, Grafana, MQTT->Influx bridge
+python sim/node_sim.py --mode model --cycle --tls       # normal → inner → ball → outer, 20 s each
+python tests/test_edge.py                               # C features/model == Python, prints "ok"
+```
+
+Dashboard and the "Bearing fault" alert: http://localhost:3000 · `scripts/stack.sh stop` to shut down.
 
 ## Results
 

@@ -6,6 +6,7 @@ firmware will send, so the bridge, database and dashboard don't change when the 
     python sim/node_sim.py --condition inner          # raw samples (Phase 2)
     python sim/node_sim.py --mode features            # features only (Phase 3)
     python sim/node_sim.py --mode model --cycle       # on-device prediction (Phase 4)
+    python sim/node_sim.py --mode model --tls         # over TLS + password like the real node (Phase 5)
 """
 import argparse
 import json
@@ -35,12 +36,20 @@ def main():
     ap.add_argument("--host", default="127.0.0.1")
     ap.add_argument("--node", default="node1")
     ap.add_argument("--seconds", type=float, default=float("inf"))
+    ap.add_argument("--tls", action="store_true", help="port 8883 with TLS + password from .env (Phase 5)")
     args = ap.parse_args()
 
     signals = {c: edge.adxl345(bearing.load(n)[0]) for c, n in RECORDING.items()}
 
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=f"sim-{args.node}")
-    client.connect(args.host, 1883)
+    port = 1883
+    if args.tls:   # connect the way the ESP32 will: port 8883, verify the broker with our CA, log in
+        root = Path(__file__).resolve().parent.parent
+        env = dict(l.strip().split("=", 1) for l in open(root / ".env") if "=" in l)
+        client.tls_set(ca_certs=str(root / ".local/certs/ca.crt"))
+        client.username_pw_set(env["MQTT_USER"], env["MQTT_PASSWORD"])
+        port = 8883
+    client.connect(args.host, port)
     client.loop_start()
 
     order = list(RECORDING) if args.cycle else [args.condition]

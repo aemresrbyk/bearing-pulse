@@ -33,6 +33,8 @@ def to_lines(node, kind, msg):
         if k in ("t", "truth"):
             continue
         fields.append(f'{k}="{v}"' if isinstance(v, str) else f"{k}={float(v)}")
+    if kind == "model":   # numeric copy of the label: Grafana alerts need a number, not a string
+        fields.append(f"fault={float(msg['label'] != 'normal')}")
     return [f"{kind},{tags} {','.join(fields)} {msg['t']}"]
 
 

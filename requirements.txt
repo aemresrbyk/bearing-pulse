@@ -3,3 +3,4 @@ scipy
 matplotlib>=3.9
 scikit-learn
 jupyter
+paho-mqtt>=2
