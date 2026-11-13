@@ -1,6 +1,6 @@
 # Phase 1 — ML on CWRU bearing data
 
-**Status:** ⬜ Planned · **Time:** ~7–9 h · **Hardware:** none
+**Status:** ✅ Done · **Hardware:** none
 
 ## Goal
 
@@ -8,70 +8,153 @@ Classify bearing condition (normal / inner race / outer race / ball fault) from 
 
 ## You need
 
-- Python 3.10+, packages in [`requirements.txt`](../requirements.txt)
+- Python 3.10–3.12, packages in [`requirements.txt`](../requirements.txt)
 - CWRU data files → see [`data/README.md`](../data/README.md)
 
-## Steps
+All reusable code is in [`src/bearing.py`](../src/bearing.py) (≈130 lines). The notebooks only call it and plot.
+Run `python src/bearing.py` for a self-check (fault-frequency formulas and envelope detector).
 
-### 0. Setup (15 min)
-Virtual environment, install packages, `git init`.
+---
 
-### 1. Understand the physics (30 min)
-Bearing fault frequencies and why each fault shows up at a different one:
-- **BPFO** — outer race
-- **BPFI** — inner race
-- **BSF** — ball spin
-- Shaft speed ≈ 1797 rpm at 0 HP
+## 0. Setup
 
-_Write the formulas and the values you computed here._
+```bash
+uv venv --python 3.12 .venv      # or: python3.12 -m venv .venv
+uv pip install -r requirements.txt
+```
 
-### 2. Load and plot the data (1 h)
-`scipy.io.loadmat`, `..._DE_time` signal, plot the first 0.1 s of each condition.
-⚠️ Normal data may be 48 kHz — resample to 12 kHz.
+**Why Python 3.12 and not the newest:** scientific packages (scipy, scikit-learn) publish binary wheels a few months after a new Python release. 3.12 installs everywhere without compiling.
 
-_Plot:_ `images/01-raw-signals.png`
+**Why raw data is not in git:** ~80 MB of `.mat` files that CWRU already hosts. `data/README.md` lists the exact file numbers so anyone can reproduce the dataset.
 
-### 3. FFT and envelope spectrum (1.5 h)
-Plain FFT → band-pass filter → `scipy.signal.hilbert` envelope → FFT of the envelope.
-Mark the expected fault frequencies on the plot.
+## 1. The physics: bearing fault frequencies
 
-_Plot:_ `images/01-envelope-spectrum.png`
+A rolling-element bearing has an outer race (fixed), an inner race (turns with the shaft), balls, and a cage. A small defect on one of them creates an impact every time a ball rolls over it. How often that happens depends only on geometry and shaft speed:
 
-### 4. Feature extraction (1 h)
-2048-sample windows. Features: RMS, peak, crest factor, kurtosis, band energies.
+| Name | Formula | Meaning | at 1797 rpm |
+|------|---------|---------|-------------|
+| f_r  | rpm / 60 | shaft | 29.9 Hz |
+| FTF  | f_r/2 · (1 − d/D) | cage | 11.9 Hz |
+| BPFO | n/2 · f_r · (1 − d/D) | ball pass, outer race | 107.4 Hz |
+| BPFI | n/2 · f_r · (1 + d/D) | ball pass, inner race | 162.2 Hz |
+| BSF  | D/(2d) · f_r · (1 − (d/D)²) | ball spin | 70.6 Hz |
 
-### 5. Classification (1 h)
-Random Forest + confusion matrix.
-Split **by time inside each recording** (first 70 % train, last 30 % test). A random split leaks neighbouring windows into the test set and inflates accuracy.
+SKF 6205-2RS: n = 9 balls, d = 0.3126", D = 1.537", contact angle 0°.
 
-_Plot:_ `images/01-confusion-matrix.png`
+**How it was checked:** `src/bearing.py` asserts that these formulas reproduce the multiples CWRU publishes (BPFI 5.4152×, BPFO 3.5848×, FTF 0.39828×). CWRU lists the ball frequency as 4.7135× = 2 × BSF, because a spinning ball hits *both* races once per revolution.
 
-### 5b. When is the model wrong? (~1 h)
-Train on 0 HP, test on 1–3 HP (a change in operating conditions, i.e. distribution shift).
-- How much does accuracy drop?
-- On wrong predictions, is the model still confident (`predict_proba`)?
+## 2. Load and plot
 
-This is the most important result of the phase.
+`scipy.io.loadmat` returns a dict; the drive-end accelerometer signal is under `X<num>_DE_time`.
 
-### 6. Write-up (1 h)
-Update this page and the main README with plots and numbers.
+Two traps found while loading:
 
-## Results
+1. **The normal recordings are sampled at 48 kHz, the fault recordings at 12 kHz.** It's easy to miss because nothing in the file says so. How I verified it: read file 97 as 12 kHz and its spectral peaks do not match any of the fault files; read it as 48 kHz and its 161.7 Hz and 360 Hz peaks line up exactly with the fault files. Fix: `scipy.signal.resample_poly(x, 1, 4)` (polyphase, includes the anti-alias filter).
+2. **`99.mat` also contains the keys of file 98** (`X098_DE_time`). Picking "the first key ending in `DE_time`" silently loads the wrong recording. Fix: build the key from the file number.
 
-| Test | Accuracy | Notes |
-|------|----------|-------|
-| 0 HP → 0 HP (time split) | | |
-| 0 HP → 1 HP | | |
-| 0 HP → 2 HP | | |
-| 0 HP → 3 HP | | |
+Files 98 and 99 have no RPM field; the nominal speed for that load is used.
 
-## Limitations
+![raw signals](../images/01-raw-signals.png)
 
-_What the model can't do, and why it matters for a real machine._
+Inner and outer race faults show a train of impacts. The outer race fault is the strongest because the defect sits in the load zone (6 o'clock) and never moves out of it.
 
-## What went wrong
+## 3. FFT and envelope spectrum
 
-_Honest notes: bugs, wrong assumptions, things that took longer than expected._
+A plain FFT does **not** show the fault frequency clearly: each impact rings the housing at its structural resonances (kHz range), so the energy appears there, not at 107 or 162 Hz.
+
+![FFT](../images/01-fft.png)
+
+Envelope analysis (demodulation) recovers *how often* the resonance is excited:
+
+1. **Band-pass 2–5 kHz** (4th-order Butterworth, zero-phase `sosfiltfilt`) — keep the resonance band where the impacts show, drop shaft/imbalance components at low frequency. The band was chosen from the FFT above, where the fault signals have most of their extra energy.
+2. **Hilbert transform → `abs`** — the analytic signal's magnitude is the envelope of the ringing bursts.
+3. **FFT of the envelope** — repetition rate of the bursts = fault frequency.
+
+![envelope spectrum](../images/01-envelope-spectrum.png)
+
+| Fault | Strongest envelope peak | Expected |
+|-------|------------------------|----------|
+| Inner race | 161.7 Hz | BPFI 162.2 Hz ✓ (plus shaft-rate sidebands: inner race rotates through the load zone) |
+| Outer race | 107.6 Hz + harmonics | BPFO 107.3 Hz ✓ |
+| Ball | weak, smeared | BSF 70.6 Hz — visible but not dominant |
+
+Ball faults are the hard case: the ball spins and tumbles, so the defect only sometimes hits a race. This matches the CWRU literature and shows up again in step 5b.
+
+## 4. Feature extraction
+
+Each recording is cut into **non-overlapping 2048-sample windows** (0.17 s ≈ 5 shaft revolutions, so every window contains several fault impacts; power of two for the FFT).
+
+17 features per window:
+
+| Group | Features | Why |
+|-------|----------|-----|
+| Time domain | RMS, peak, crest factor (peak/RMS), kurtosis, skewness, std | Kurtosis and crest factor measure *impulsiveness* — impacts make the distribution heavy-tailed. RMS/peak measure overall level. |
+| Spectrum | log relative energy in 8 equal FFT bands (0–6 kHz) | Where the energy sits; relative (divided by total) so it doesn't depend on overall level. |
+| Envelope | max envelope amplitude within ±3 % of BPFO, BPFI, BSF | The physics from steps 1–3, as numbers. ±3 % absorbs speed error; at least one FFT bin wide (≈ 6 Hz). |
+
+![features](../images/01-features.png)
+
+## 5. Classification
+
+Random Forest, 200 trees, default settings. Chosen because it needs no feature scaling, handles mixed-scale features, gives feature importances, and is small enough to later convert to C for the ESP32 (Phase 4).
+
+**Split by time inside each recording:** first 70 % of every file → train, last 30 % → test. Neighbouring windows from the same recording are nearly identical; a random split puts them on both sides and measures memorisation rather than generalisation.
+
+Result at 0 HP: **100 % test accuracy** (time split). The random split also gives 100 %, so on this easy subset the leakage doesn't change the number — but the time split is still the honest protocol and is kept.
+
+![confusion matrix](../images/01-confusion-matrix.png)
+
+Most important features: FFT band energies, then std and the BPFI envelope amplitude.
+
+**Honest note:** 100 % on CWRU 0.007" with four classes is a known result; the recordings come from one test rig on one day, so the classes are very separable. A perfect score here says little about a real machine, which is exactly why step 5b exists.
+
+## 5b. When is the model wrong?
+
+Train on **all 0 HP windows**, then test on conditions the model never saw.
+
+### Shift 1: motor load (1–3 HP)
+
+Load lowers the speed (1797 → ~1725 rpm) and changes vibration level.
+
+| Test load | Accuracy | Mean confidence (`predict_proba` max) |
+|-----------|----------|---------------------------------------|
+| 1 HP | 100 % | 0.97 |
+| 2 HP | 100 % | 0.94 |
+| 3 HP | 100 % | 0.83 |
+
+The model does not fail, but its **confidence drops steadily** as the operating point moves away from training — an early warning that's free to monitor. Dropping the absolute-amplitude features (RMS, peak, std) gives 100 / 100 / 99.6 %, so the model isn't just relying on vibration level.
+
+![load shift](../images/01-load-shift-cm.png)
+
+### Shift 2: defect size (0.007" → 0.021")
+
+Same 0 HP, but test on **3× larger defects** (files 209, 222, 234). In a real machine a defect grows over time, so this is the shift a deployed model meets for sure.
+
+**Accuracy drops to 56.5 %.**
+
+| True | Predicted |
+|------|-----------|
+| Inner (59 windows) | **all 59 → ball** |
+| Ball (59) | 47 ball, 12 normal |
+| Outer (59) | 53 outer, 6 ball |
+
+![fault size shift](../images/01-fault-size-shift-cm.png)
+
+- The outer race fault still works: its envelope peak at BPFO is strong and size-independent.
+- The bigger inner race fault is classified as a ball fault in every window: its spectrum changed shape, and the model learned the 0.007" spectral fingerprint, not the physics.
+- **Confidence was the warning sign:** no wrong prediction had confidence above 0.49 (mean 0.40), compared to 0.97 on in-distribution data. A rule like "confidence < 0.6 → don't trust, flag for inspection" would have caught every error here (but also flags many correct predictions — mean confidence on correct ones was 0.47).
+
+**Takeaway:** a model trained on one fault severity does not transfer to another. In practice: train on several severities, lean on physically motivated features (envelope at the fault frequencies), and always expose the model's confidence to the operator instead of a bare label.
+
+## Notebooks
+
+| Notebook | Step |
+|----------|------|
+| [`01_load_and_plot`](../notebooks/01_load_and_plot.ipynb) | 2 |
+| [`02_fft_envelope`](../notebooks/02_fft_envelope.ipynb) | 3 |
+| [`03_features`](../notebooks/03_features.ipynb) | 4 |
+| [`04_classification`](../notebooks/04_classification.ipynb) | 5 |
+| [`05_load_shift`](../notebooks/05_load_shift.ipynb) | 5b |
 
 ## Next
 

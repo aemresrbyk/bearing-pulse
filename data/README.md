@@ -10,14 +10,25 @@ Files used (12 kHz drive-end, 0.007" fault diameter):
 
 | Condition | Load | File | Signal key |
 |-----------|------|------|------------|
-| Normal | 0 HP | | `X..._DE_time` |
-| Inner race fault | 0 HP | | `X..._DE_time` |
-| Ball fault | 0 HP | | `X..._DE_time` |
-| Outer race fault (6:00) | 0 HP | | `X..._DE_time` |
-| Same four conditions | 1–3 HP | | used in step 5b (load-change test) |
+| Normal | 0 / 1 / 2 / 3 HP | 97 / 98 / 99 / 100 | `X097_DE_time` … |
+| Inner race fault | 0 / 1 / 2 / 3 HP | 105 / 106 / 107 / 108 | `X105_DE_time` … |
+| Ball fault | 0 / 1 / 2 / 3 HP | 118 / 119 / 120 / 121 | `X118_DE_time` … |
+| Outer race fault (6:00) | 0 / 1 / 2 / 3 HP | 130 / 131 / 132 / 133 | `X130_DE_time` … |
+| 0.021" faults (inner / ball / outer) | 0 HP | 209 / 222 / 234 | test only (step 5b, defect-size shift) |
+
+Download all of them:
+
+```bash
+mkdir -p data/raw && cd data/raw
+for n in 97 98 99 100 105 106 107 108 118 119 120 121 130 131 132 133 209 222 234; do
+  curl -fLO https://engineering.case.edu/sites/default/files/$n.mat
+done
+```
 
 Notes:
-- Normal baseline files may be sampled at 48 kHz — resample to 12 kHz with `scipy.signal.resample_poly` before mixing with fault data.
+- Normal baseline files **are** sampled at 48 kHz (verified: read as 48 kHz, their spectral peaks match the 12 kHz fault files). `src/bearing.py` resamples them with `scipy.signal.resample_poly(x, 1, 4)`.
+- `99.mat` also contains `X098_*` keys — always build the key from the file number.
+- 98 and 99 have no RPM field; nominal 1772 / 1750 rpm is used.
 - Shaft speed at 0 HP ≈ 1797 rpm.
 
 ## Own data (Phase 3+)

@@ -1,5 +1,5 @@
 numpy
 scipy
-matplotlib
+matplotlib>=3.9
 scikit-learn
 jupyter
