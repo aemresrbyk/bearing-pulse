@@ -7,5 +7,6 @@
 | `03_features.ipynb` | 4 — windowing and feature extraction |
 | `04_classification.ipynb` | 5 — Random Forest, confusion matrix |
 | `05_load_shift.ipynb` | 5b — train 0 HP, test 1–3 HP and 0.021" defects |
+| `06_generalisation.ipynb` | 5b — leave-one-severity-out; envelope features fix the 0.021" case |
 
 Guide: [docs/01-ml-on-cwru-data.md](../docs/01-ml-on-cwru-data.md)

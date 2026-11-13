@@ -17,6 +17,8 @@ FILES = {
 }
 # 0.021" faults at 0 HP: only used as an out-of-distribution test (bigger defect than training)
 FILES_021 = {209: ("inner", 0), 222: ("ball", 0), 234: ("outer", 0)}
+FILES_014 = {169: ("inner", 0), 185: ("ball", 0), 197: ("outer", 0)}
+ENV_FEATURES = ["env_BPFO", "env_BPFI", "env_2BSF"]   # physics-based subset, generalises across defect size
 CLASSES = ["normal", "inner", "ball", "outer"]
 NOMINAL_RPM = {0: 1797, 1: 1772, 2: 1750, 3: 1730}  # used when a file has no RPM key
 
@@ -69,7 +71,7 @@ def windows(x, size=2048):
 FEATURE_NAMES = (
     ["rms", "peak", "crest", "kurtosis", "skewness", "std"]
     + [f"band{i}" for i in range(8)]
-    + ["env_BPFO", "env_BPFI", "env_BSF"]
+    + ["env_BPFO", "env_BPFI", "env_2BSF"]
 )
 
 
@@ -84,7 +86,9 @@ def features(w, rpm, fs=FS):
     ff = fault_freqs(rpm)
     # max envelope amplitude within ±3 % of each fault frequency, at least one bin wide (~6 Hz bins)
     tol = lambda f0: max(0.03 * f0, f[1])
-    env_at = [env[np.abs(f - ff[k]) <= tol(ff[k])].max() for k in ("BPFO", "BPFI", "BSF")]
+    # ball defect hits both races each spin, so it shows at 2×BSF in the envelope
+    targets = [ff["BPFO"], ff["BPFI"], 2 * ff["BSF"]]
+    env_at = [env[np.abs(f - t) <= tol(t)].max() for t in targets]
     return np.r_[rms, peak, peak / rms, stats.kurtosis(w), stats.skew(w), w.std(), bands, env_at]
 
 

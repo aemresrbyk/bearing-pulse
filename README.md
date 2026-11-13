@@ -67,25 +67,28 @@ Dataset download steps: [data/README.md](data/README.md)
 
 ### Phase 1 — CWRU bearing data ([full write-up](docs/01-ml-on-cwru-data.md))
 
-**How:** drive-end vibration, 12 kHz → 2048-sample windows → 17 features (time-domain stats, FFT band energies, envelope amplitude at the bearing fault frequencies) → Random Forest. Train/test split by time inside each recording, so neighbouring windows never leak into the test set.
+**How:** drive-end vibration, 12 kHz → 2048-sample windows → features → Random Forest. Train/test split by time inside each recording, so neighbouring windows never leak into the test set.
 
 **Why envelope analysis:** a bearing defect makes a short impact every time a ball passes it. The impacts ring the housing at kHz resonances, so a plain FFT hides the fault frequency. Band-pass (2–5 kHz) → Hilbert envelope → FFT recovers the impact rate, which matches the frequency computed from bearing geometry:
 
 ![envelope spectrum](images/01-envelope-spectrum.png)
 
-| Test | Accuracy | Notes |
-|------|----------|-------|
-| 0 HP, time split | **100 %** | Easy, known result for CWRU 0.007" — not the interesting part |
-| Train 0 HP → test 1 / 2 / 3 HP | 100 / 100 / 100 % | Confidence drops 0.97 → 0.83 as the load moves away from training |
-| Train 0.007" → test 0.021" defects | **56.5 %** | Every larger inner race fault classified as "ball". Wrong predictions all had confidence < 0.5 |
+| Test | All 17 features | Envelope features only (3) |
+|------|-----------------|----------------------------|
+| 0 HP, time split | 100 % | 100 % |
+| Train 0 HP → test 1 / 2 / 3 HP | 100 / 100 / 100 % | 100 / 100 / 100 % |
+| Train 0.007" → test 0.021" defects | 59.3 % | **97.7 %** |
+| Leave-one-severity-out, mean of 3 folds | 57.5 % | **75.5 %** |
+
+**What I learned:** with all features the model learned the spectral *fingerprint* of one defect size and fell to 59.3 % on a bigger defect. Keeping only the envelope amplitudes at the bearing fault frequencies (BPFO, BPFI, 2×BSF), which depend on geometry and shaft speed but not on defect size, brought it to 97.7 %. The feature set was chosen by leave-one-severity-out cross-validation, not by the test score.
 
 ### Limitations
 
-- **Load change (train 0 HP → test 1–3 HP):** accuracy stays at 100 %, but mean confidence drops from 0.97 to 0.83. The model is less sure the further the operating point moves from training.
-- **Defect size change (train 0.007" → test 0.021"):** accuracy falls to 56.5 %. All 59 larger inner race windows are predicted as "ball". The model learned the spectral fingerprint of one fault severity, not the physics.
-- **Confidence is the warning sign:** no wrong prediction had confidence above 0.49. A deployed system should report confidence and flag low-confidence windows instead of showing a bare label.
-- **One rig, one day:** CWRU data comes from a single test rig with artificially seeded faults. Real machines add noise, varying speed and gradual wear, so 100 % here is not a field accuracy.
-- **Next steps:** train on several fault severities, rely more on physics-based envelope features, and measure all of this on my own sensor data (Phase 2–4).
+- **0.014" defects stay hard (~37 % for every feature set).** In these recordings the outer race fault shows no dominant BPFO peak and the ball fault no clear 2×BSF peak; Smith & Randall's CWRU benchmark (2015) also flags several as not clearly diagnosable. No model can learn a signature that isn't in the signal.
+- **Ball faults are the weakest class:** a spinning ball only sometimes hits the defect against a race, so its envelope peak is weak.
+- **Confidence is the warning sign:** with all features, no wrong prediction on 0.021" had confidence above 0.5 (vs 0.98 in-distribution). Under load change, confidence dropped 0.98 → 0.84 before any error. A deployed system should report confidence and flag low-confidence windows.
+- **One rig, seeded faults:** CWRU faults were made by electro-discharge machining on one test rig. Real machines add noise, varying speed and gradual wear, so 100 % here is not a field accuracy.
+- **Next steps:** measure the same pipeline on my own sensor data (Phase 2–4), where the "fault" is a real imbalance on a fan.
 
 Two data traps worth knowing: the CWRU **normal recordings are 48 kHz** while the fault recordings are 12 kHz (verified from matching spectral peaks), and **`99.mat` also contains file 98's signal keys**.
 
