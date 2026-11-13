@@ -1,0 +1,6 @@
+apiVersion: 1
+providers:
+  - name: bearing-pulse
+    type: file
+    options:
+      path: ${BP_DASHBOARDS}

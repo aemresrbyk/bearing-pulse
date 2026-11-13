@@ -26,3 +26,6 @@ Thumbs.db
 *-backups/
 *.kicad_prl
 fp-info-cache
+
+# Local stack data and logs
+.local/

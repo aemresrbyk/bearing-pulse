@@ -1,0 +1,10 @@
+apiVersion: 1
+datasources:
+  - name: InfluxDB
+    uid: influx
+    type: influxdb
+    url: http://127.0.0.1:8181
+    jsonData:
+      dbName: bearingpulse
+      httpMode: GET
+    isDefault: true
