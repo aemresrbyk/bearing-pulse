@@ -31,6 +31,13 @@ Status: ⬜ Planned · 🟨 In progress · ✅ Done
 
 Full walkthrough of every phase (what, why, which file): [docs/HOW-IT-WORKS.md](docs/HOW-IT-WORKS.md)
 
+### Next steps (hardware ordered, not yet arrived)
+
+- [ ] Wiring diagram and pin choice: ESP32 ↔ ADXL345 over SPI (I²C is borderline at 3200 Hz)
+- [ ] ESP32 firmware: ADXL345 over SPI, Wi-Fi + TLS MQTT, on-device features and prediction with `bearing_edge`, offline buffering (step 15), OTA (step 16); compiled and checked before the board arrives
+- [ ] Scripts to record labelled data (normal / imbalance) and retrain on it (steps 11–12), tested with the simulator
+- [ ] KiCad schematic and layout (Phase 6) once the pins are fixed
+
 ## Repository layout
 
 ```
