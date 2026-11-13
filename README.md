@@ -79,7 +79,13 @@ Dataset download steps: [data/README.md](data/README.md)
 | Train 0 HP → test 1 / 2 / 3 HP | 100 / 100 / 100 % | Confidence drops 0.97 → 0.83 as the load moves away from training |
 | Train 0.007" → test 0.021" defects | **56.5 %** | Every larger inner race fault classified as "ball". Wrong predictions all had confidence < 0.5 |
 
-**What I learned:** the model generalises across load but not across defect size — it learned the spectral fingerprint of one fault severity, not the physics. Its confidence was the warning sign every time, so a deployed system should report confidence and flag low-confidence windows instead of showing a bare label.
+### Limitations
+
+- **Load change (train 0 HP → test 1–3 HP):** accuracy stays at 100 %, but mean confidence drops from 0.97 to 0.83. The model is less sure the further the operating point moves from training.
+- **Defect size change (train 0.007" → test 0.021"):** accuracy falls to 56.5 %. All 59 larger inner race windows are predicted as "ball". The model learned the spectral fingerprint of one fault severity, not the physics.
+- **Confidence is the warning sign:** no wrong prediction had confidence above 0.49. A deployed system should report confidence and flag low-confidence windows instead of showing a bare label.
+- **One rig, one day:** CWRU data comes from a single test rig with artificially seeded faults. Real machines add noise, varying speed and gradual wear, so 100 % here is not a field accuracy.
+- **Next steps:** train on several fault severities, rely more on physics-based envelope features, and measure all of this on my own sensor data (Phase 2–4).
 
 Two data traps worth knowing: the CWRU **normal recordings are 48 kHz** while the fault recordings are 12 kHz (verified from matching spectral peaks), and **`99.mat` also contains file 98's signal keys**.
 
