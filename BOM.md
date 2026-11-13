@@ -30,9 +30,9 @@ Nothing to buy. Any laptop with Python 3.10+ is enough (no GPU needed).
 
 | Part | Qty | Approx. price | Notes |
 |------|-----|---------------|-------|
-| Perfboard (prototype board) | 1 | | Sized to the KiCad layout |
-| Female pin headers | 2×15 + 1×8 | | ESP32 plugs in (removable); connector for the sensor cable |
-| Hook-up wire | — | | Point-to-point wiring on the back |
+| Perfboard 7×9 cm, FR4, double-sided, plated holes | 2 | 135.50 TL each | One spare. 2.54 mm pitch |
+| Female pin headers 1×40, 2.54 mm | 4 strips | 185.50 TL | Cut to 2×15 (ESP32 plugs in, removable) + 1×8 (sensor cable) |
+| Hook-up wire | — | — | Already had: cut jumper wires. Point-to-point wiring on the back |
 | Soldering iron, solder | 1 set | — | Already bought for Phase 2 (see above) |
 | *Not planned:* fabricated PCB (e.g. JLCPCB) | — | | Design is order-ready (Gerbers in `hardware/pcb/`), but not ordered |
 
