@@ -10,10 +10,11 @@ Nothing to buy. Any laptop with Python 3.10+ is enough (no GPU needed).
 
 | Part | Qty | Used in | Approx. price | Notes |
 |------|-----|---------|---------------|-------|
-| ESP32 DevKit (ESP32-WROOM-32) | 1 | 2–5 | | Wi-Fi is required from Phase 2 on |
-| ADXL345 accelerometer module | 1 | 2–5 | | Use SPI for higher sample rates |
-| Small 12 V fan or DC motor | 1 | 2–4 | | The "machine" under test |
-| 12 V adapter (for fan/motor) | 1 | 2–4 | | |
+| ESP32 DevKit (ESP32-WROOM-32) | 1 | 2–5 | 469.90 TL | Robotistan ESP-32S, 30 pin. Wi-Fi is required from Phase 2 on |
+| ADXL345 accelerometer module | 1 | 2–5 | 199.90 TL | Robotistan GY-291. Headers come unsoldered. Use SPI for higher sample rates |
+| Small 12 V fan or DC motor | 1 | 2–4 | 212.00 TL | XMER 80×80×25 mm, 12 V 0.30 A, 2 wires. The "machine" under test |
+| 12 V adapter (for fan/motor) | 1 | 2–4 | 152.10 TL | Weiron 12 V 2 A, 5.5×2.5 mm plug. Plug cut off and soldered to the fan wires (barrel-jack terminals are 2.1 mm and would sit loose) |
+| Soldering iron set | 1 | 2, 6 | 908.99 TL | Wellhise S90, temperature-controlled. Needed for the ADXL345 headers and the Phase 6 board |
 | Breadboard | 1 | 2 | | |
 | Jumper wires (M-M, M-F) | 1 set | 2 | | |
 | Micro-USB / USB-C data cable | 1 | 2 | | Must support data, not only charging |
@@ -27,7 +28,7 @@ Nothing to buy. Any laptop with Python 3.10+ is enough (no GPU needed).
 |------|-----|---------------|-------|
 | PCB order (e.g. JLCPCB, 5 boards) | 1 | | Plus shipping |
 | Components for the board | — | | Generated from KiCad BOM |
-| Soldering iron, solder, flux | 1 set | | Skip if you already have one |
+| Soldering iron, solder, flux | 1 set | | Already bought for Phase 2 (see above) |
 
 ## What I already had
 
